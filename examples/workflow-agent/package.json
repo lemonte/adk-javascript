@@ -1,0 +1,27 @@
+{
+  "name": "workflow-agent-example",
+  "version": "1.0.0",
+  "description": "Example demonstrating sequential workflow agents in ADK JavaScript",
+  "main": "index.ts",
+  "scripts": {
+    "start": "npx tsx index.ts",
+    "dev": "npx tsx watch index.ts"
+  },
+  "dependencies": {
+    "@google/adk": "file:../../",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "adk",
+    "workflow",
+    "sequential",
+    "agent",
+    "example"
+  ],
+  "author": "Geanderson Lemonte",
+  "license": "Apache-2.0"
+}

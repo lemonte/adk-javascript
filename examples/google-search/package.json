@@ -1,0 +1,26 @@
+{
+  "name": "adk-google-search-example",
+  "version": "1.0.0",
+  "description": "ADK Google Search Agent Example",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node index.ts"
+  },
+  "dependencies": {
+    "../../": "file:../../",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0"
+  },
+  "keywords": [
+    "adk",
+    "agent",
+    "google-search",
+    "example"
+  ],
+  "author": "Geanderson Lemonte",
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "token-usage-example",
+  "version": "1.0.0",
+  "description": "Example demonstrating token usage tracking with ADK",
+  "main": "index.ts",
+  "scripts": {
+    "start": "tsx index.ts",
+    "dev": "tsx watch index.ts"
+  },
+  "dependencies": {
+    "@google/adk": "file:../../"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "dotenv": "^16.0.0",
+    "ts-node": "^10.9.0",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

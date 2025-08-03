@@ -1,0 +1,33 @@
+{
+  "name": "adk-bigquery-example",
+  "version": "1.0.0",
+  "description": "ADK BigQuery Integration Example - Query and analyze data with AI agents",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node index.ts",
+    "build": "tsc index.ts",
+    "dev": "ts-node-dev --respawn index.ts"
+  },
+  "keywords": [
+    "adk",
+    "ai",
+    "bigquery",
+    "sql",
+    "data-analysis",
+    "google-cloud",
+    "gemini",
+    "llm",
+    "agent"
+  ],
+  "author": "Geanderson Lemonte",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@google/adk": "file:../../"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "human-in-loop-example",
+  "version": "1.0.0",
+  "description": "Example demonstrating human-in-the-loop workflows with ADK",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node index.ts"
+  },
+  "dependencies": {
+    "../../": "file:../../",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0"
+  }
+}

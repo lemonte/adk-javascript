@@ -1,0 +1,36 @@
+{
+  "name": "adk-oauth-calendar-agent-example",
+  "version": "1.0.0",
+  "description": "ADK OAuth Calendar Agent Example - Google Calendar integration with OAuth2 authentication",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node index.ts",
+    "build": "tsc index.ts",
+    "dev": "ts-node-dev --respawn index.ts"
+  },
+  "keywords": [
+    "adk",
+    "ai",
+    "oauth",
+    "oauth2",
+    "calendar",
+    "google-calendar",
+    "authentication",
+    "google-cloud",
+    "vertex-ai",
+    "llm",
+    "agent",
+    "productivity"
+  ],
+  "author": "Geanderson Lemonte",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@google/adk": "file:../../"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.0"
+  }
+}
