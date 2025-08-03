@@ -178,9 +178,69 @@ main().catch(console.error);
 
 ### 6. Execute
 
+**For JavaScript (.js files):**
 ```bash
 node run.js
 ```
+
+**For TypeScript (.ts files):**
+
+First, install TypeScript and ts-node:
+```bash
+npm install -D typescript ts-node @types/node
+```
+
+Then run directly:
+```bash
+npx ts-node run.ts
+```
+
+Or compile and run:
+```bash
+npx tsc run.ts
+node run.js
+```
+
+## 🏃‍♂️ Running Examples
+
+The project includes several examples in the `examples/` directory. Here's how to run them:
+
+### JavaScript Examples
+
+```bash
+# Navigate to an example directory
+cd examples/hello-world
+
+# Run the JavaScript version
+node agent.js
+```
+
+### TypeScript Examples
+
+```bash
+# Navigate to an example directory
+cd examples/hello-world
+
+# Install TypeScript dependencies (if not already installed)
+npm install -D typescript ts-node @types/node
+
+# Run the TypeScript version directly
+npx ts-node agent.ts
+
+# Or compile first, then run
+npx tsc agent.ts
+node agent.js
+```
+
+### Available Examples
+
+- `hello-world/` - Basic agent setup
+- `google-search/` - Agent with Google Search integration
+- `weather-time/` - Weather and time tools
+- `memory/` - Agent with memory capabilities
+- `workflow-agent/` - Multi-step workflow example
+- `rag-agent/` - Retrieval-Augmented Generation
+- And many more...
 
 ## 📚 Documentation
 
@@ -276,6 +336,27 @@ We welcome contributions from the community! Whether it's bug reports, feature r
 
 ADK JavaScript fully supports TypeScript out of the box. Simply use `.ts` files instead of `.js`:
 
+### TypeScript Configuration
+
+Create a `tsconfig.json` file in your project:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
+```
+
+### TypeScript Example
+
 ```typescript
 import { Agent, createTool, ToolHandler } from '@google/adk';
 
@@ -297,6 +378,20 @@ const greetTool = createTool<GreetParams>({
         return `Hello, ${name}! Nice to meet you.`;
     }
 });
+```
+
+### Running TypeScript Files
+
+```bash
+# Install TypeScript dependencies
+npm install -D typescript ts-node @types/node
+
+# Run directly with ts-node
+npx ts-node your-agent.ts
+
+# Or compile and run
+npx tsc your-agent.ts
+node your-agent.js
 ```
 
 ## 💡 Vibe Coding
