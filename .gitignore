@@ -125,8 +125,6 @@ out
 # dist/
 build/
 lib/
-*.d.ts
-!src/**/*.d.ts
 
 # IDE files
 .vscode/
