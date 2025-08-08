@@ -13,7 +13,8 @@ export { Agent, LlmAgent, BaseAgent } from './agents/index';
 export { Runner, InMemoryRunner } from './runners/index';
 export { Session, InMemorySessionService } from './sessions/index';
 export { BaseMemoryService, InMemoryMemoryService, MemoryEntry } from './memory/index';
-
+import * as dotenv from 'dotenv';
+dotenv.config({ override: true });
 // Tools exports
 export {
   BaseTool,
