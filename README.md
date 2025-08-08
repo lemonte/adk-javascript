@@ -54,48 +54,35 @@ for how they can work together.
 
 Make sure you have Node.js (version 18 or higher) installed on your system.
 
-### Install from GitHub (Current Method)
+### Install from GitHub
 
-Since the package is not yet available on npm, you can install directly from the GitHub repository:
+To use the adk-javascript package, add it to your project's dependencies in `package.json`:
+
+```json
+{
+  "dependencies": {
+    "adk-javascript": "github:lemonte/adk-javascript"
+  }
+}
+```
+
+Then install the dependencies:
 
 ```bash
-npm install git+https://github.com/lemonte/adk-javascript.git
+npm install
+```
+
+Or install directly using npm:
+
+```bash
+npm install github:lemonte/adk-javascript
 ```
 
 Or using `yarn`:
 
 ```bash
-yarn add git+https://github.com/lemonte/adk-javascript.git
+yarn add github:lemonte/adk-javascript
 ```
-
-### Clone and Build Locally
-
-Alternatively, you can clone the repository and build it locally:
-
-```bash
-git clone https://github.com/lemonte/adk-javascript.git
-cd adk-javascript
-npm install
-npm run build
-```
-
-Then link it to your project:
-
-```bash
-npm link
-# In your project directory:
-npm link @google/adk
-```
-
-### Future npm Release
-
-Once available on npm, you will be able to install using:
-
-```bash
-npm install @google/adk
-```
-
-The release cadence will be weekly once published to npm.
 
 ## 🚀 Quick Start
 
@@ -109,8 +96,20 @@ npm init -y
 
 ### 2. Install ADK
 
+Add to your `package.json`:
+
+```json
+{
+  "dependencies": {
+    "adk-javascript": "github:lemonte/adk-javascript"
+  }
+}
+```
+
+Then install:
+
 ```bash
-npm install git+https://github.com/lemonte/adk-javascript.git
+npm install
 ```
 
 ### 3. Set up your API key
@@ -124,30 +123,57 @@ export GOOGLE_API_KEY="your-api-key-here"
 Create a file called `agent.js`:
 
 ```javascript
-import { Agent, createTool } from '@google/adk';
+import * as adk from 'adk-javascript';
 
-// Create a simple tool
-const greetTool = createTool({
+// Create roll die tool with state tracking
+const rollDieTool = adk.createTool(
+  function rollDie(sides) {
+    const result = Math.floor(Math.random() * sides) + 1;
+    console.log(`🎲 Rolled a ${sides}-sided die: ${result}`);
+    return result;
+  },
+  {
+    name: 'roll_die',
+    description: 'Roll a die and return the rolled result',
+    parameters: {
+      type: 'object',
+      properties: {
+        sides: {
+          type: 'integer',
+          description: 'The integer number of sides the die has',
+          minimum: 2,
+          maximum: 100
+        }
+      },
+      required: ['sides']
+    }
+  }
+);
+
+// Create a simple greeting tool
+const greetTool = adk.createTool(
+  function greet(name) {
+    return `Hello, ${name}! Nice to meet you.`;
+  },
+  {
     name: 'greet',
     description: 'Greets a person by name',
     parameters: {
-        type: 'object',
-        properties: {
-            name: { type: 'string', description: 'The name of the person to greet' }
-        },
-        required: ['name']
-    },
-    handler: async ({ name }) => {
-        return `Hello, ${name}! Nice to meet you.`;
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'The name of the person to greet' }
+      },
+      required: ['name']
     }
-});
+  }
+);
 
 // Create the agent
-const agent = new Agent({
-    name: 'greeting_assistant',
+const agent = new adk.Agent({
+    name: 'dice_assistant',
     model: 'gemini-2.0-flash',
-    instruction: 'You are a friendly assistant that greets people.',
-    tools: [greetTool]
+    instruction: 'You are a helpful assistant that can greet people and roll dice for games.',
+    tools: [greetTool, rollDieTool]
 });
 
 export { agent };
@@ -158,10 +184,10 @@ export { agent };
 Create a file called `run.js`:
 
 ```javascript
-import { InMemoryRunner } from '@google/adk';
+import * as adk from 'adk-javascript';
 import { agent } from './agent.js';
 
-const runner = new InMemoryRunner();
+const runner = new adk.InMemoryRunner();
 
 async function main() {
     const session = await runner.createSession({
@@ -169,7 +195,16 @@ async function main() {
         sessionId: 'demo-session'
     });
 
-    const response = await session.send('Please greet John');
+    // Test greeting
+    let response = await session.send('Please greet John');
+    console.log('Agent response:', response.content);
+    
+    // Test dice rolling
+    response = await session.send('Roll a 6-sided die for me');
+    console.log('Agent response:', response.content);
+    
+    // Test dice rolling with different sides
+    response = await session.send('Roll a 20-sided die');
     console.log('Agent response:', response.content);
 }
 
@@ -235,11 +270,13 @@ node agent.js
 ### Available Examples
 
 - `hello-world/` - Basic agent setup
+- `dice-game/` - Dice rolling and prime number checking (demonstrates new import syntax)
 - `google-search/` - Agent with Google Search integration
 - `weather-time/` - Weather and time tools
 - `memory/` - Agent with memory capabilities
 - `workflow-agent/` - Multi-step workflow example
 - `rag-agent/` - Retrieval-Augmented Generation
+- `callbacks/` - Callback functionality demonstration
 - And many more...
 
 ## 📚 Documentation
@@ -254,15 +291,14 @@ deploying agents:
 ### Define a single agent:
 
 ```javascript
-import { Agent } from '@google/adk';
-import { googleSearch } from '@google/adk/tools';
+import * as adk from 'adk-javascript';
 
-const rootAgent = new Agent({
+const rootAgent = new adk.Agent({
     name: "search_assistant",
     model: "gemini-2.0-flash", // Or your preferred Gemini model
     instruction: "You are a helpful assistant. Answer user questions using Google Search when needed.",
     description: "An assistant that can search the web.",
-    tools: [googleSearch]
+    tools: [adk.tools.googleSearch]
 });
 ```
 
@@ -271,23 +307,23 @@ const rootAgent = new Agent({
 Define a multi-agent system with coordinator agent, greeter agent, and task execution agent. Then ADK engine and the model will guide the agents works together to accomplish the task.
 
 ```javascript
-import { LlmAgent } from '@google/adk';
+import * as adk from 'adk-javascript';
 
 // Define individual agents
-const greeter = new LlmAgent({
+const greeter = new adk.LlmAgent({
     name: "greeter", 
     model: "gemini-2.0-flash"
     // ... other options
 });
 
-const taskExecutor = new LlmAgent({
+const taskExecutor = new adk.LlmAgent({
     name: "task_executor", 
     model: "gemini-2.0-flash"
     // ... other options
 });
 
 // Create parent agent and assign children via subAgents
-const coordinator = new LlmAgent({
+const coordinator = new adk.LlmAgent({
     name: "Coordinator",
     model: "gemini-2.0-flash",
     description: "I coordinate greetings and tasks.",
@@ -296,6 +332,7 @@ const coordinator = new LlmAgent({
         taskExecutor
     ]
 });
+```
 ```
 
 ### Development UI
@@ -315,10 +352,10 @@ npx adk eval \
 Or using the programmatic API:
 
 ```javascript
-import { evaluate } from '@google/adk/evaluation';
+import * as adk from 'adk-javascript';
 import { rootAgent } from './examples/hello-world/agent.js';
 
-const results = await evaluate({
+const results = await adk.evaluate({
     agent: rootAgent,
     evalSet: './examples/hello-world/hello_world_eval_set_001.evalset.json'
 });
@@ -358,25 +395,62 @@ Create a `tsconfig.json` file in your project:
 ### TypeScript Example
 
 ```typescript
-import { Agent, createTool, ToolHandler } from '@google/adk';
+import * as adk from 'adk-javascript';
 
 interface GreetParams {
     name: string;
 }
 
-const greetTool = createTool<GreetParams>({
-    name: 'greet',
-    description: 'Greets a person by name',
-    parameters: {
-        type: 'object',
-        properties: {
-            name: { type: 'string', description: 'The name of the person to greet' }
-        },
-        required: ['name']
-    },
-    handler: async ({ name }: GreetParams): Promise<string> => {
+interface RollDieParams {
+    sides: number;
+}
+
+const greetTool = adk.createTool<GreetParams>(
+    function greet({ name }: GreetParams): string {
         return `Hello, ${name}! Nice to meet you.`;
+    },
+    {
+        name: 'greet',
+        description: 'Greets a person by name',
+        parameters: {
+            type: 'object',
+            properties: {
+                name: { type: 'string', description: 'The name of the person to greet' }
+            },
+            required: ['name']
+        }
     }
+);
+
+const rollDieTool = adk.createTool<RollDieParams>(
+    function rollDie({ sides }: RollDieParams): number {
+        const result = Math.floor(Math.random() * sides) + 1;
+        console.log(`🎲 Rolled a ${sides}-sided die: ${result}`);
+        return result;
+    },
+    {
+        name: 'roll_die',
+        description: 'Roll a die and return the rolled result',
+        parameters: {
+            type: 'object',
+            properties: {
+                sides: {
+                    type: 'integer',
+                    description: 'The integer number of sides the die has',
+                    minimum: 2,
+                    maximum: 100
+                }
+            },
+            required: ['sides']
+        }
+    }
+);
+
+const agent = new adk.Agent({
+    name: 'typescript_agent',
+    model: 'gemini-2.0-flash',
+    instruction: 'You are a helpful assistant that can greet people and roll dice.',
+    tools: [greetTool, rollDieTool]
 });
 ```
 
