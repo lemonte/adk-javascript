@@ -23,67 +23,6 @@
 
 Agent Development Kit (ADK) is a flexible and modular framework for developing and deploying AI agents. While optimized for Gemini and the Google ecosystem, ADK is model-agnostic, deployment-agnostic, and is built for compatibility with other frameworks. ADK was designed to make agent development feel more like software development, to make it easier for developers to create, deploy, and orchestrate agentic architectures that range from simple tasks to complex workflows.
 
-
----
-
-## ✨ Key Features
-
-- **Rich Tool Ecosystem**: Utilize pre-built tools, custom functions,
-  OpenAPI specs, or integrate existing tools to give agents diverse
-  capabilities, all for tight integration with the Google ecosystem.
-
-- **Code-First Development**: Define agent logic, tools, and orchestration
-  directly in JavaScript/TypeScript for ultimate flexibility, testability, and versioning.
-
-- **Modular Multi-Agent Systems**: Design scalable applications by composing
-  multiple specialized agents into flexible hierarchies.
-
-- **Deploy Anywhere**: Easily containerize and deploy agents on Cloud Run or
-  scale seamlessly with Vertex AI Agent Engine.
-
-## 🤖 Agent2Agent (A2A) Protocol and ADK Integration
-
-For remote agent-to-agent communication, ADK integrates with the
-[A2A protocol](https://github.com/google-a2a/A2A/).
-See this [example](https://github.com/a2aproject/a2a-samples/tree/main/samples/python/agents)
-for how they can work together.
-
-## 🚀 Installation
-
-### Prerequisites
-
-Make sure you have Node.js (version 18 or higher) installed on your system.
-
-### Install from GitHub
-
-To use the adk-javascript package, add it to your project's dependencies in `package.json`:
-
-```json
-{
-  "dependencies": {
-    "adk-javascript": "github:lemonte/adk-javascript"
-  }
-}
-```
-
-Then install the dependencies:
-
-```bash
-npm install
-```
-
-Or install directly using npm:
-
-```bash
-npm install github:lemonte/adk-javascript
-```
-
-Or using `yarn`:
-
-```bash
-yarn add github:lemonte/adk-javascript
-```
-
 ## 🚀 Quick Start
 
 ### 1. Create a new project
@@ -96,7 +35,12 @@ npm init -y
 
 ### 2. Install ADK
 
-Add to your `package.json`:
+Run:
+```bash
+npm install github:lemonte/adk-javascript
+```
+
+Or add to your `package.json`:
 
 ```json
 {
@@ -106,376 +50,332 @@ Add to your `package.json`:
 }
 ```
 
-Then install:
-
+Then run:
 ```bash
 npm install
 ```
 
 ### 3. Set up your API key
 
+Create a `.env` file with:
 ```bash
 export GOOGLE_API_KEY="your-api-key-here"
 ```
 
+Get your API key from: https://aistudio.google.com/app/apikey
+
 ### 4. Create your first agent
 
-Create a file called `agent.js`:
-
+Use the import:
 ```javascript
 import * as adk from 'adk-javascript';
-
-// Create roll die tool with state tracking
-const rollDieTool = adk.createTool(
-  function rollDie(sides) {
-    const result = Math.floor(Math.random() * sides) + 1;
-    console.log(`🎲 Rolled a ${sides}-sided die: ${result}`);
-    return result;
-  },
-  {
-    name: 'roll_die',
-    description: 'Roll a die and return the rolled result',
-    parameters: {
-      type: 'object',
-      properties: {
-        sides: {
-          type: 'integer',
-          description: 'The integer number of sides the die has',
-          minimum: 2,
-          maximum: 100
-        }
-      },
-      required: ['sides']
-    }
-  }
-);
-
-// Create a simple greeting tool
-const greetTool = adk.createTool(
-  function greet(name) {
-    return `Hello, ${name}! Nice to meet you.`;
-  },
-  {
-    name: 'greet',
-    description: 'Greets a person by name',
-    parameters: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', description: 'The name of the person to greet' }
-      },
-      required: ['name']
-    }
-  }
-);
-
-// Create the agent
-const agent = new adk.Agent({
-    name: 'dice_assistant',
-    model: 'gemini-2.0-flash',
-    instruction: 'You are a helpful assistant that can greet people and roll dice for games.',
-    tools: [greetTool, rollDieTool]
-});
-
-export { agent };
 ```
 
-### 5. Run your agent
+Check the `examples/` folder for usage examples.
 
-Create a file called `run.js`:
+Or create an `index.js`/`index.ts` file and use this code example:
 
 ```javascript
 import * as adk from 'adk-javascript';
-import { agent } from './agent.js';
 
-const runner = new adk.InMemoryRunner();
+const codeExecutorTool = adk.createTool(
+  async (args) => {
+    const { code, language = 'python' } = args;
+    
+    // Simulate code execution (in a real implementation, this would use a secure sandbox)
+    console.log(`\n--- Executing ${language} code ---`);
+    console.log(code);
+    console.log('--- End code ---\n');
+    
+    // Simple simulation of common Python operations
+    try {
+      // Basic math operations
+      if (code.includes('print(') && /\d+\s*[+\-*/]\s*\d+/.test(code)) {
+        const mathMatch = code.match(/(\d+)\s*([+\-*/])\s*(\d+)/);
+        if (mathMatch) {
+          const [, a, op, b] = mathMatch;
+          const num1 = parseInt(a);
+          const num2 = parseInt(b);
+          let result;
+          switch (op) {
+            case '+': result = num1 + num2; break;
+            case '-': result = num1 - num2; break;
+            case '*': result = num1 * num2; break;
+            case '/': result = num2 !== 0 ? num1 / num2 : 'Error: Division by zero'; break;
+            default: result = 'Unknown operation';
+          }
+          return {
+            success: true,
+            output: `${result}`,
+            code,
+            language,
+            message: 'Code executed successfully (simulated)'
+          };
+        }
+      }
+      
+      // List operations
+      if (code.includes('[') && code.includes(']') && code.includes('print(')) {
+        return {
+          success: true,
+          output: '[1, 2, 3, 4, 5]',
+          code,
+          language,
+          message: 'List operation executed successfully (simulated)'
+        };
+      }
+      
+      // Default simulation
+      return {
+        success: true,
+        output: 'Code executed successfully\n(This is a simulation - in a real implementation, this would execute in a secure Python environment)',
+        code,
+        language,
+        message: 'Code execution completed (simulated)'
+      };
+      
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Execution failed',
+        code,
+        language,
+        message: 'Code execution failed (simulated error)'
+      };
+    }
+  },
+  {
+    name: 'execute_code',
+    parameters: {
+      type: 'object',
+      properties: {
+        code: {
+          type: 'string',
+          description: 'Python code to execute'
+        },
+        language: {
+          type: 'string',
+          description: 'Programming language (currently only Python is supported)',
+          enum: ['python'],
+          default: 'python'
+        }
+      },
+      required: ['code']
+    }
+  }
+);
+
+// File operations tool
+const fileOperationsTool = adk.createTool(
+  async function fileOperations(params) {
+    const { operation, path, content } = params;
+    
+    console.log(`\n--- File Operation: ${operation} on ${path} ---`);
+    
+    // Simulate file operations
+    try {
+      switch (operation) {
+        case 'read':
+          if (path.endsWith('.py')) {
+            return {
+              success: true,
+              content: '# Sample Python file\nprint("Hello, World!")\n',
+              path,
+              operation,
+              message: 'File read successfully (simulated)'
+            };
+          } else if (path.endsWith('.txt')) {
+            return {
+              success: true,
+              content: 'This is a sample text file content.\nLine 2 of the file.\n',
+              path,
+              operation,
+              message: 'File read successfully (simulated)'
+            };
+          } else {
+            return {
+              success: true,
+              content: 'Generic file content',
+              path,
+              operation,
+              message: 'File read successfully (simulated)'
+            };
+          }
+          
+        case 'write':
+          return {
+            success: true,
+            path,
+            content,
+            operation,
+            message: `File written successfully to ${path} (simulated)`
+          };
+          
+        case 'list':
+          return {
+            success: true,
+            files: ['file1.py', 'file2.txt', 'data.json', 'script.py'],
+            path,
+            operation,
+            message: `Directory listing for ${path} (simulated)`
+          };
+          
+        case 'create_directory':
+          return {
+            success: true,
+            path,
+            operation,
+            message: `Directory created at ${path} (simulated)`
+          };
+          
+        default:
+          return {
+            success: false,
+            error: `Unknown operation: ${operation}`,
+            path,
+            operation,
+            message: 'Operation failed'
+          };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: 'File operation failed',
+        path,
+        operation,
+        message: 'File operation failed (simulated error)'
+      };
+    }
+  },
+  {
+    name: 'file_operations',
+    description: 'Perform file operations like reading, writing, or listing files',
+    parameters: {
+      type: 'object',
+      properties: {
+        operation: {
+          type: 'string',
+          description: 'Type of file operation to perform',
+          enum: ['read', 'write', 'list', 'create_directory']
+        },
+        path: {
+          type: 'string',
+          description: 'File or directory path'
+        },
+        content: {
+          type: 'string',
+          description: 'Content to write (only for write operations)'
+        }
+      },
+      required: ['operation', 'path']
+    }
+  }
+);
+
+export const rootAgent = new adk.Agent({
+  model: 'gemini-2.0-flash-exp',
+  name: 'Code Execution Assistant',
+  description: 'An AI assistant that can execute code safely',
+  instruction: `You are a helpful AI assistant that can execute code to help users with programming tasks.
+
+You have access to a simulated code execution environment where you can:
+- Run Python code (simulated)
+- Perform calculations
+- Process data
+- Work with files
+- Test algorithms
+
+Always explain what you're going to do before executing code, and interpret the results for the user.
+If there are errors, help debug and fix them.
+Be helpful and educational in your responses.
+
+Note: This is a demonstration environment with simulated code execution.`,
+  tools: [codeExecutorTool, fileOperationsTool]
+});
 
 async function main() {
-    const session = await runner.createSession({
-        agent,
-        sessionId: 'demo-session'
-    });
+  const appName = 'code_execution_app';
+  const userId = 'user1';
+  const sessionService = new adk.InMemorySessionService();
+  
+  const runner = new adk.InMemoryRunner(rootAgent, {
+    maxIterations: 10,
+    enableLogging: true
+  });
+  
+  const session = await sessionService.createSession({
+    appName,
+    userId,
+  });
 
-    // Test greeting
-    let response = await session.send('Please greet John');
-    console.log('Agent response:', response.content);
+  async function askAgent(query) {
+    console.log(`\n>>> User: ${query}`);
+    console.log('--- Agent Response ---');
     
-    // Test dice rolling
-    response = await session.send('Roll a 6-sided die for me');
-    console.log('Agent response:', response.content);
+    // Create proper session state with messages array
+    const sessionState = {
+      messages: [],
+      metadata: {
+        createdAt: new Date().toISOString(),
+        example: 'code-execution'
+      }
+    };
     
-    // Test dice rolling with different sides
-    response = await session.send('Roll a 20-sided die');
-    console.log('Agent response:', response.content);
-}
-
-main().catch(console.error);
-```
-
-### 6. Execute
-
-**For JavaScript (.js files):**
-```bash
-node run.js
-```
-
-**For TypeScript (.ts files):**
-
-First, install TypeScript and ts-node:
-```bash
-npm install -D typescript ts-node @types/node
-```
-
-Then run directly:
-```bash
-npx ts-node run.ts
-```
-
-Or compile and run:
-```bash
-npx tsc run.ts
-node run.js
-```
-
-## 🏃‍♂️ Running Examples
-
-The project includes several examples in the `examples/` directory. Here's how to run them:
-
-### JavaScript Examples
-
-```bash
-# Navigate to an example directory
-cd examples/hello-world
-
-# Run the JavaScript version
-node agent.js
-```
-
-### TypeScript Examples
-
-```bash
-# Navigate to an example directory
-cd examples/hello-world
-
-# Install TypeScript dependencies (if not already installed)
-npm install -D typescript ts-node @types/node
-
-# Run the TypeScript version directly
-npx ts-node agent.ts
-
-# Or compile first, then run
-npx tsc agent.ts
-node agent.js
-```
-
-### Available Examples
-
-- `hello-world/` - Basic agent setup
-- `dice-game/` - Dice rolling and prime number checking (demonstrates new import syntax)
-- `google-search/` - Agent with Google Search integration
-- `weather-time/` - Weather and time tools
-- `memory/` - Agent with memory capabilities
-- `workflow-agent/` - Multi-step workflow example
-- `rag-agent/` - Retrieval-Augmented Generation
-- `callbacks/` - Callback functionality demonstration
-- And many more...
-
-## 📚 Documentation
-
-Explore the full documentation for detailed guides on building, evaluating, and
-deploying agents:
-
-* **[Documentation](https://google.github.io/adk-docs)**
-
-## 🏁 Feature Highlight
-
-### Define a single agent:
-
-```javascript
-import * as adk from 'adk-javascript';
-
-const rootAgent = new adk.Agent({
-    name: "search_assistant",
-    model: "gemini-2.0-flash", // Or your preferred Gemini model
-    instruction: "You are a helpful assistant. Answer user questions using Google Search when needed.",
-    description: "An assistant that can search the web.",
-    tools: [adk.tools.googleSearch]
-});
-```
-
-### Define a multi-agent system:
-
-Define a multi-agent system with coordinator agent, greeter agent, and task execution agent. Then ADK engine and the model will guide the agents works together to accomplish the task.
-
-```javascript
-import * as adk from 'adk-javascript';
-
-// Define individual agents
-const greeter = new adk.LlmAgent({
-    name: "greeter", 
-    model: "gemini-2.0-flash"
-    // ... other options
-});
-
-const taskExecutor = new adk.LlmAgent({
-    name: "task_executor", 
-    model: "gemini-2.0-flash"
-    // ... other options
-});
-
-// Create parent agent and assign children via subAgents
-const coordinator = new adk.LlmAgent({
-    name: "Coordinator",
-    model: "gemini-2.0-flash",
-    description: "I coordinate greetings and tasks.",
-    subAgents: [ // Assign subAgents here
-        greeter,
-        taskExecutor
-    ]
-});
-```
-```
-
-### Development UI
-
-A built-in development UI to help you test, evaluate, debug, and showcase your agent(s).
-
-<img src="https://raw.githubusercontent.com/google/adk-python/main/assets/adk-web-dev-ui-function-call.png"/>
-
-### Evaluate Agents
-
-```bash
-npx adk eval \
-    examples/hello-world \
-    examples/hello-world/hello_world_eval_set_001.evalset.json
-```
-
-Or using the programmatic API:
-
-```javascript
-import * as adk from 'adk-javascript';
-import { rootAgent } from './examples/hello-world/agent.js';
-
-const results = await adk.evaluate({
-    agent: rootAgent,
-    evalSet: './examples/hello-world/hello_world_eval_set_001.evalset.json'
-});
-
-console.log('Evaluation results:', results);
-```
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Whether it's bug reports, feature requests, documentation improvements, or code contributions, please see our
-- [General contribution guideline and flow](https://google.github.io/adk-docs/contributing-guide/).
-- Then if you want to contribute code, please read [Code Contributing Guidelines](./CONTRIBUTING.md) to get started.
-
-## 🔧 TypeScript Support
-
-ADK JavaScript fully supports TypeScript out of the box. Simply use `.ts` files instead of `.js`:
-
-### TypeScript Configuration
-
-Create a `tsconfig.json` file in your project:
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    const context = {
+      sessionId: session.id,
+      userId,
+      appName,
+      agentName: 'code-execution-agent',
+      requestId: `code-execution-request-${Date.now()}`,
+      timestamp: new Date(),
+      metadata: {
+        source: 'code-execution-example'
+      },
+      agent: rootAgent,
+      session: {
+        id: session.id,
+        appName,
+        userId,
+        state: sessionState,
+        events: [],
+        lastUpdateTime: Date.now()
+      },
+      invocationId: `code-execution-invocation-${Date.now()}`
+    };
+    
+    const result = await runner.run({
+      role: 'user',
+      parts: [{ type: 'text', text: query }]
+    }, sessionState, context);
+    
+    // Extract text from response
+    const responseText = result.response.parts
+      ?.filter(part => part.type === 'text')
+      .map(part => part.text)
+      .filter(Boolean)
+      .join(' ') || 'No response';
+    
+    console.log(responseText);
+    console.log('--- End Response ---\n');
   }
-}
-```
 
-### TypeScript Example
-
-```typescript
-import * as adk from 'adk-javascript';
-
-interface GreetParams {
-    name: string;
-}
-
-interface RollDieParams {
-    sides: number;
+  // Example queries demonstrating code execution capabilities
+  await askAgent('Calculate the factorial of 10 using JavaScript');
+  
+  await askAgent('Create an array of the first 20 Fibonacci numbers and show me the result');
+  
+  await askAgent('I have this sales data: [{"month": "Jan", "sales": 1000}, {"month": "Feb", "sales": 1500}, {"month": "Mar", "sales": 1200}]. Calculate the total sales and average monthly sales.');
+  
+  await askAgent('Generate a simple analysis of the sales data from the previous question. Which month had the highest sales?');
+  
+  await askAgent('Create a function that finds all prime numbers up to 50 and show me the result');
 }
 
-const greetTool = adk.createTool<GreetParams>(
-    function greet({ name }: GreetParams): string {
-        return `Hello, ${name}! Nice to meet you.`;
-    },
-    {
-        name: 'greet',
-        description: 'Greets a person by name',
-        parameters: {
-            type: 'object',
-            properties: {
-                name: { type: 'string', description: 'The name of the person to greet' }
-            },
-            required: ['name']
-        }
-    }
-);
-
-const rollDieTool = adk.createTool<RollDieParams>(
-    function rollDie({ sides }: RollDieParams): number {
-        const result = Math.floor(Math.random() * sides) + 1;
-        console.log(`🎲 Rolled a ${sides}-sided die: ${result}`);
-        return result;
-    },
-    {
-        name: 'roll_die',
-        description: 'Roll a die and return the rolled result',
-        parameters: {
-            type: 'object',
-            properties: {
-                sides: {
-                    type: 'integer',
-                    description: 'The integer number of sides the die has',
-                    minimum: 2,
-                    maximum: 100
-                }
-            },
-            required: ['sides']
-        }
-    }
-);
-
-const agent = new adk.Agent({
-    name: 'typescript_agent',
-    model: 'gemini-2.0-flash',
-    instruction: 'You are a helpful assistant that can greet people and roll dice.',
-    tools: [greetTool, rollDieTool]
-});
+if (require.main === module) {
+  main().catch(console.error);
+}
 ```
-
-### Running TypeScript Files
-
-```bash
-# Install TypeScript dependencies
-npm install -D typescript ts-node @types/node
-
-# Run directly with ts-node
-npx ts-node your-agent.ts
-
-# Or compile and run
-npx tsc your-agent.ts
-node your-agent.js
-```
-
-## 💡 Vibe Coding
-
-If you are developing agents via vibe coding, you can use the project's documentation files as context for LLMs. Check the `examples/` directory for comprehensive code samples and patterns.
 
 ## 📄 License
 
 This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
-
----
-
-*Happy Agent Building!*
