@@ -1,5 +1,5 @@
 {
-  "name": "@google/adk",
+  "name": "adk-javascript",
   "version": "1.0.0",
   "description": "Agent Development Kit (ADK) for JavaScript/Node.js - A flexible and modular framework for developing and deploying AI agents",
   "main": "dist/index.js",
