@@ -1,6 +1,6 @@
 {
   "name": "adk-javascript",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Agent Development Kit (ADK) for JavaScript/Node.js - A flexible and modular framework for developing and deploying AI agents",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
